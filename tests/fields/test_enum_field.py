@@ -3,7 +3,7 @@ from enum import Enum
 import pytest
 from bson import InvalidDocument
 
-from mongoengine import Document, EnumField, ValidationError
+from mongoengine import Document, EnumField, ValidationError, ListField
 from tests.utils import MongoDBTestCase, get_as_pymongo
 
 
@@ -19,6 +19,11 @@ class Color(Enum):
 
 class ModelWithEnum(Document):
     status = EnumField(Status)
+
+
+class ModelWithListEnum(Document):
+    status = EnumField(Status)
+    statuses = ListField(EnumField(Status))
 
 
 class TestStringEnumField(MongoDBTestCase):
@@ -90,6 +95,19 @@ class TestStringEnumField(MongoDBTestCase):
             EnumField(Status, choices=[Color.RED])
         with pytest.raises(ValueError, match="Invalid choices"):
             EnumField(Status, choices=[Status.DONE, Color.RED])
+
+    def test_casting_on_list_enum_field(self):
+        ModelWithListEnum.drop_collection()
+        model = ModelWithListEnum(status=Status.NEW, statuses=[Status.NEW]).save()
+        assert model.status == Status.NEW
+        assert model.statuses == [Status.NEW]
+        model.reload()
+        assert model.status == Status.NEW
+        assert model.statuses == [Status.NEW]
+        model.status = 'done'
+        assert model.status == Status.DONE
+        model.statuses = ['new', 'done']
+        assert model.statuses == [Status.NEW, Status.DONE]
 
 
 class ModelWithColor(Document):
