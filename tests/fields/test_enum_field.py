@@ -98,15 +98,15 @@ class TestStringEnumField(MongoDBTestCase):
 
     def test_casting_on_list_enum_field(self):
         ModelWithListEnum.drop_collection()
-        model = ModelWithListEnum(status="new", statuses=[Status.NEW]).save()
+        model = ModelWithListEnum(status='new', statuses=['new']).save()
         assert model.status == Status.NEW
         assert model.statuses == [Status.NEW]
         model.reload()
         assert model.status == Status.NEW
         assert model.statuses == [Status.NEW]
-        model.status = "done"
+        model.status = 'done'
         assert model.status == Status.DONE
-        model.statuses = ["new", "done"]
+        model.statuses = ['new', 'done']
         assert model.statuses == [Status.NEW, Status.DONE]
 
 
@@ -132,10 +132,7 @@ class TestIntEnumField(MongoDBTestCase):
         assert get_as_pymongo(model) == {"_id": model.id, "color": 2}
 
     def test_validate_model(self):
-        with pytest.raises(ValidationError, match="Value must be one of"):
-            ModelWithColor(color=3).validate()
-
-        with pytest.raises(ValidationError, match="Value must be one of"):
+        with pytest.raises(ValidationError, match="is not a valid Color"):
             ModelWithColor(color="wrong_type").validate()
 
 

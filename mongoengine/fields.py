@@ -1660,6 +1660,11 @@ class EnumField(BaseField):
             kwargs["choices"] = list(self._enum_cls)  # Implicit validator
         super().__init__(**kwargs)
 
+    def _validate(self, value):
+        if not isinstance(value, self._enum_cls):
+            value = self._enum_cls(value)
+        return super()._validate(value)
+
     def __set__(self, instance, value):
         is_legal_value = value is None or isinstance(value, self._enum_cls)
         if not is_legal_value:
