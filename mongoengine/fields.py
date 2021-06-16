@@ -941,6 +941,12 @@ class ListField(ComplexBaseField):
             and value
         ):
             instance._data[self.name] = [self.field.build_lazyref(x) for x in value]
+        elif isinstance(self.field, EnumField) and value \
+                and not all(isinstance(sub_value, self.field._enum_cls)
+                            for sub_value in value):
+            instance._data[self.name] = [
+                sub_value if isinstance(sub_value, self.field._enum_cls)
+                else self.field._enum_cls(sub_value) for sub_value in value]
         return super().__get__(instance, owner)
 
     def validate(self, value):
