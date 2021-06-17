@@ -273,10 +273,7 @@ class ComplexBaseField(BaseField):
     def _lazy_load_refs(instance, name, ref_values, *, max_depth):
         _dereference = _import_class("DeReference")()
         documents = _dereference(
-            ref_values,
-            max_depth=max_depth,
-            instance=instance,
-            name=name,
+            ref_values, max_depth=max_depth, instance=instance, name=name,
         )
         return documents
 
@@ -285,8 +282,7 @@ class ComplexBaseField(BaseField):
             if isinstance(value, (list, tuple)):
                 value = [self.field.to_python(sub_val) for sub_val in value]
             elif isinstance(value, dict):
-                value = {key: self.field.to_python(sub)
-                         for key, sub in value.items()}
+                value = {key: self.field.to_python(sub) for key, sub in value.items()}
         return super().__set__(instance, value)
 
     def __get__(self, instance, owner):

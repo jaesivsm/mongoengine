@@ -99,35 +99,35 @@ class TestStringEnumField(MongoDBTestCase):
 
     def test_embedding_in_complex_field(self):
         ModelComplexEnum.drop_collection()
-        model = ModelComplexEnum(status='new', statuses=['new'],
-                                 color_mapping={'red': 1}).save()
+        model = ModelComplexEnum(
+            status="new", statuses=["new"], color_mapping={"red": 1}
+        ).save()
         assert model.status == Status.NEW
         assert model.statuses == [Status.NEW]
-        assert model.color_mapping == {'red': Color.RED}
+        assert model.color_mapping == {"red": Color.RED}
         model.reload()
         assert model.status == Status.NEW
         assert model.statuses == [Status.NEW]
-        assert model.color_mapping == {'red': Color.RED}
-        model.status = 'done'
-        model.color_mapping = {'blue': 2}
-        model.statuses = ['new', 'done']
+        assert model.color_mapping == {"red": Color.RED}
+        model.status = "done"
+        model.color_mapping = {"blue": 2}
+        model.statuses = ["new", "done"]
         assert model.status == Status.DONE
-        assert model.color_mapping == {'blue': Color.BLUE}, model.color_mapping
+        assert model.color_mapping == {"blue": Color.BLUE}, model.color_mapping
         assert model.statuses == [Status.NEW, Status.DONE], model.statuses
         model = model.save().reload()
         assert model.status == Status.DONE
-        assert model.color_mapping == {'blue': Color.BLUE}, model.color_mapping
+        assert model.color_mapping == {"blue": Color.BLUE}, model.color_mapping
         assert model.statuses == [Status.NEW, Status.DONE], model.statuses
 
         with pytest.raises(ValidationError, match="must be one of ..Status"):
             model.statuses = [1]
             model.save()
 
-        model.statuses = ['done']
-        model.color_mapping = {'blue': 'done'}
+        model.statuses = ["done"]
+        model.color_mapping = {"blue": "done"}
         with pytest.raises(ValidationError, match="must be one of ..Color"):
             model.save()
-
 
 
 class ModelWithColor(Document):
