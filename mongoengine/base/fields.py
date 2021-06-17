@@ -273,7 +273,10 @@ class ComplexBaseField(BaseField):
     def _lazy_load_refs(instance, name, ref_values, *, max_depth):
         _dereference = _import_class("DeReference")()
         documents = _dereference(
-            ref_values, max_depth=max_depth, instance=instance, name=name,
+            ref_values,
+            max_depth=max_depth,
+            instance=instance,
+            name=name,
         )
         return documents
 
