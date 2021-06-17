@@ -941,19 +941,6 @@ class ListField(ComplexBaseField):
             and value
         ):
             instance._data[self.name] = [self.field.build_lazyref(x) for x in value]
-        elif (
-            isinstance(self.field, EnumField)
-            and value
-            and not all(
-                isinstance(sub_value, self.field._enum_cls) for sub_value in value
-            )
-        ):
-            instance._data[self.name] = [
-                sub_value
-                if isinstance(sub_value, self.field._enum_cls)
-                else self.field._enum_cls(sub_value)
-                for sub_value in value
-            ]
         return super().__get__(instance, owner)
 
     def validate(self, value):
@@ -1660,19 +1647,25 @@ class EnumField(BaseField):
             kwargs["choices"] = list(self._enum_cls)  # Implicit validator
         super().__init__(**kwargs)
 
-    def _validate(self, value):
+    def validate(self, value):
+        if isinstance(value, self._enum_cls):
+            return super().validate(value)
+        try:
+            self._enum_cls(value)
+        except ValueError:
+            self.error("%s is not a valid %s" % (value, self._enum_cls))
+
+    def to_python(self, value):
+        value = super().to_python(value)
         if not isinstance(value, self._enum_cls):
-            value = self._enum_cls(value)
-        return super()._validate(value)
+            try:
+                return self._enum_cls(value)
+            except ValueError:
+                return value
+        return value
 
     def __set__(self, instance, value):
-        is_legal_value = value is None or isinstance(value, self._enum_cls)
-        if not is_legal_value:
-            try:
-                value = self._enum_cls(value)
-            except Exception:
-                pass
-        return super().__set__(instance, value)
+        return super().__set__(instance, self.to_python(value))
 
     def to_mongo(self, value):
         if isinstance(value, self._enum_cls):

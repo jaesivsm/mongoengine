@@ -134,9 +134,7 @@ class BaseField:
         # If setting to None and there is a default value provided for this
         # field, then set the value to the default value.
         if value is None:
-            if self.null:
-                value = None
-            elif self.default is not None:
+            if not self.null and self.default is not None:
                 value = self.default
                 if callable(value):
                     value = value()
@@ -281,6 +279,15 @@ class ComplexBaseField(BaseField):
             name=name,
         )
         return documents
+
+    def __set__(self, instance, value):
+        if self.field:
+            if isinstance(value, (list, tuple)):
+                value = [self.field.to_python(sub_val) for sub_val in value]
+            elif isinstance(value, dict):
+                value = {key: self.field.to_python(sub)
+                         for key, sub in value.items()}
+        return super().__set__(instance, value)
 
     def __get__(self, instance, owner):
         """Descriptor to automatically dereference references."""
