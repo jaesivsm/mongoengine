@@ -1653,7 +1653,7 @@ class EnumField(BaseField):
         try:
             self._enum_cls(value)
         except ValueError:
-            self.error("%s is not a valid %s" % (value, self._enum_cls))
+            self.error("{} is not a valid {}".format(value, self._enum_cls))
 
     def to_python(self, value):
         value = super().to_python(value)

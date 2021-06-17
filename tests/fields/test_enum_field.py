@@ -3,7 +3,13 @@ from enum import Enum
 import pytest
 from bson import InvalidDocument
 
-from mongoengine import Document, EnumField, ValidationError, ListField, DictField
+from mongoengine import (
+    DictField,
+    Document,
+    EnumField,
+    ListField,
+    ValidationError,
+)
 from tests.utils import MongoDBTestCase, get_as_pymongo
 
 
